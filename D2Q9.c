@@ -17,8 +17,8 @@ Cálculo da Densidade e Plotagem: Por fim, calcula a densidade e prepara dados p
 #include <string.h>   // biblioteca para manipulação de strings
 
 // constantes para o tamanho das matrizes e número de direções, nesse caso D2Q9
-#define M 40         // Número de pontos em x
-#define N 40         // Número de pontos em y
+#define M 10         // Número de pontos em x
+#define N 10         // Número de pontos em y
 #define Q 9          // Número de direções
 
 // função auxiliar para circular a propagação das matrizes, substituindo o circshift do MATLAB
@@ -53,9 +53,9 @@ int main() {
     
     double rho[M][N], x[M], y[N], fluxq[M], flux[M]; // Matrizes e vetores auxiliares
     double Tm[M], Z[N][M], w[Q];   // Matrizes e vetores para resultados e pesos
-    double alpha = 0.75;            // Parâmetro para o modelo (0,25)
+    double alpha = 0.25;            // Parâmetro para o modelo (0,25)
     double omega = 1.0 / (3.0 * alpha + 0.5); // Relaxação
-    double twall = 1.0;             // Condição da parede
+    double twall = 100.0;             // Condição da parede
     int nstep = 100;                // Número de passos de tempo (400)
 
     // Inicializando arrays com zeros
@@ -163,7 +163,15 @@ int main() {
             rho[i][j] = f0[i][j] + sumk; // Calcula a densidade total
         }
     }
-
+        
+    /*
+    // Inicialização com uma pequena perturbação
+    for (int i = 0; i < M; i++) {
+        for (int j = 0; j < N; j++) {
+            rho[i][j] = 1.0 + 0.01 * (rand() / (double)RAND_MAX);  // Perturbação aleatória
+        }
+    }
+    */
     // Rotação da matriz para plotagem de contorno
     for (int j = 0; j < N; j++) {
         for (int i = 0; i < M; i++) {
@@ -177,10 +185,26 @@ int main() {
     }
 
     // Exibir resultados (substitua pela sua própria implementação de gráficos)
-    printf("X         T         Flux        Fluxq\n"); // Cabeçalho da tabela
+    /*printf("X         T         Flux        Fluxq\n"); // Cabeçalho da tabela
     for (int i = 0; i < M; i++) {
         printf("%lf  %lf  %lf  %lf\n", x[i], Tm[i], flux[i], fluxq[i]); // Exibe as coordenadas x e Tm
     }
+    */
+   // Escreve os dados de Tm no arquivo, formatando para mostrar uma tabela (X horizontal e Y vertical)
+    printf("Y/X      ");  // Cabeçalho para os valores de X
+    for (int i = 0; i < M; i++) {
+        printf("%8.2lf ", x[i]);  // Imprime os valores de X na horizontal com espaçamento
+    }
+    printf("\n");  // Quebra de linha após imprimir todos os X
+
+    for (int j = 0; j < N; j++) {
+        printf("%8.2lf ", y[j]);  // Imprime o valor de Y no início de cada linha (coluna de Y)
+        for (int i = 0; i < M; i++) {
+            printf("%8.2lf ", rho[i][j]);  // Imprime o valor de Tm (ou rho) com espaçamento
+        }
+        printf("\n");  // Quebra de linha após cada linha de Y
+    }
+
 
     // Salvar os resultados em um arquivo
     FILE *fp;
@@ -195,6 +219,7 @@ int main() {
     for (int i = 0; i < M; i++) {
         fprintf(fp, "%lf %lf\n", x[i], Tm[i]); // Formato: x T
     }
+    
     
     fclose(fp); // Fecha o arquivo
 
